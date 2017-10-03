@@ -15,6 +15,9 @@ if (arg('-h') || arg('--help')) {
     timeTransOnly: arg('-t'),
     levelFirst: arg('-l'),
     forceColor: arg('-c'),
+    showHostname: arg('-s'),
+    showBase: arg('-b'),
+    filterLevel: levelArg('-f'),
     messageKey: messageKeyArg()
   })).pipe(process.stdout)
 }
@@ -26,6 +29,19 @@ function usage () {
 
 function arg (s) {
   return !!~process.argv.indexOf(s)
+}
+
+function levelArg (s) {
+  if (!arg('-f')) {
+    return 0;
+  }
+
+  var index = process.argv.indexOf('-f');
+  if (process.argv.length > index) {
+    return process.argv[index + 1];
+  } else {
+    return 'trace';
+  }
 }
 
 function messageKeyArg () {

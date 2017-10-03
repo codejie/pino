@@ -123,25 +123,76 @@ Object.defineProperty(
   {value: LOG_VERSION}
 )
 
+// function asJson (obj, msg, num) {
+//   // to catch both null and undefined
+//   var hasObj = obj !== undefined && obj !== null
+//   var objError = hasObj && obj instanceof Error
+//   msg = !msg && objError ? obj.message : msg || undefined
+//   var data = this._baseLog + this._lscache[num] + this.time()
+//   if (msg !== undefined) {
+//     // JSON.stringify is safe here
+//     data += this.messageKeyString + JSON.stringify('' + msg)
+//   }
+//   // we need the child bindings added to the output first so that logged
+//   // objects can take precedence when JSON.parse-ing the resulting log line
+//   data = data + this.chindings
+//   var value
+//   if (hasObj) {
+//     var notHasOwnProperty = obj.hasOwnProperty === undefined
+//     if (objError) {
+//       data += ',"type":"Error","stack":' + this.stringify(obj.stack)
+//     }
+//     for (var key in obj) {
+//       value = obj[key]
+//       if ((notHasOwnProperty || obj.hasOwnProperty(key)) && value !== undefined) {
+//         value = this.stringify(this.serializers[key] ? this.serializers[key](value) : value)
+//         if (value !== undefined) {
+//           data += ',"' + key + '":' + value
+//         }
+//       }
+//     }
+//   }
+//   return data + this.end
+// }
+
 function asJson (obj, msg, num) {
-  // to catch both null and undefined
-  var hasObj = obj !== undefined && obj !== null
-  var objError = hasObj && obj instanceof Error
-  msg = !msg && objError ? obj.message : msg || undefined
-  var data = this._baseLog + this._lscache[num] + this.time()
+
+  var data = this._baseLog + this._lscache[num] + this.time();
   if (msg !== undefined) {
-    // JSON.stringify is safe here
-    data += this.messageKeyString + JSON.stringify('' + msg)
+    var i = 0;
+    var ret = [];
+    msg.forEach(function (m) {
+      if (typeof m === 'string') {
+        ret.push({
+          t: 's',
+          o: m
+        });
+      } else {
+        if (m instanceof Error) {
+          ret.push({
+            t: 'e',
+            o: {
+              msg: m.message,
+              stack: m.stack
+            }
+          });
+        } else {
+          ret.push({
+            t: 'o',
+            o: JSON.stringify(m)
+          });
+        };
+      }
+       ++ i;
+    });
+
+    data += this.messageKeyString + JSON.stringify(ret);
   }
-  // we need the child bindings added to the output first so that logged
-  // objects can take precedence when JSON.parse-ing the resulting log line
-  data = data + this.chindings
-  var value
-  if (hasObj) {
+
+  data = data + this.chindings;
+  var value;
+  if (obj !== undefined && obj !== null) {
     var notHasOwnProperty = obj.hasOwnProperty === undefined
-    if (objError) {
-      data += ',"type":"Error","stack":' + this.stringify(obj.stack)
-    }
     for (var key in obj) {
       value = obj[key]
       if ((notHasOwnProperty || obj.hasOwnProperty(key)) && value !== undefined) {
@@ -152,8 +203,10 @@ function asJson (obj, msg, num) {
       }
     }
   }
+  
   return data + this.end
 }
+
 Object.defineProperty(pinoPrototype, 'asJson', {
   enumerable: true,
   value: asJson

@@ -1,13 +1,19 @@
 'use strict'
 
-var pino = require('./')()
+var pino = require('./')({
+  // prettyPrint: true
+  // formatter: function (v) {
+  //   return v;
+  // }  
+})
 
-pino.info('hello world')
-pino.error('this is at error level')
-pino.info('the answer is %d', 42)
-pino.info({ obj: 42 }, 'hello world')
-pino.info({ obj: 42, b: 2 }, 'hello world')
-pino.info({ nested: { obj: 42 } }, 'nested')
+// pino.info('hello world')
+// pino.error('this is at error level')
+// pino.info('the answer is %d', 42)
+pino.info({ hostname: '111', obj: 42 }, {what: 'hello world'})
+pino.info({ hostname: '111', obj: 42 }, 'hello world')
+pino.info({ obj: 42, b: 2 }, {aaaa:'aaa'}, 'hello world')
+pino.info({ nested: { obj: 42 } }, 'nested',{'ss':0})
 setImmediate(function () {
   pino.info('after setImmediate')
 })

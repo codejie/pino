@@ -23,4 +23,7 @@
   -m <key>         Highlight the message at the <key> property
   -t               Convert Epoch timestamps to ISO
   -l               Flip level and date
+  -s               Show Hostname ad pid
+  -b               Show more base info
+  -f <level>       Set level filter
 

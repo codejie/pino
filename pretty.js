@@ -3,6 +3,9 @@
 var split = require('split2')
 var Parse = require('fast-json-parse')
 var chalk = require('chalk')
+var format = require('quick-format-unescaped')
+
+var standardLevels = require('./lib/levels');
 
 var levels = {
   default: 'USERLVL',
@@ -45,6 +48,24 @@ function filter (value, messageKey) {
   return result
 }
 
+function filterBase (value, messageKey) {
+  var keys = Object.keys(value)
+  var filteredKeys = standardKeys.concat([messageKey])
+
+  var ret = {};
+  keys.map(function (key) {
+    if (filteredKeys.indexOf(key) < 0) {
+      ret[key] = value[key];
+    }
+  });
+
+  if (Object.keys(ret).length > 0) {
+    return ret;
+  } else {
+    return null;
+  }
+}
+
 function isPinoLine (line) {
   return line &&
     line.hasOwnProperty('hostname') &&
@@ -58,7 +79,16 @@ function pretty (opts) {
   var levelFirst = opts && opts.levelFirst
   var messageKey = opts && opts.messageKey
   var forceColor = opts && opts.forceColor
+  var showBase = opts && opts.showBase;
+  var showHostname = opts && opts.showHostname;
+  var filterLevel = ((opts && opts.filterLevel) ? opts.filterLevel : 'trace');
   messageKey = messageKey || 'msg'
+
+  if (standardLevels.isStandardLevel(filterLevel)) {
+    filterLevel = standardLevels.levels[filterLevel];
+  } else {
+    filterLevel = 0;
+  }
 
   var stream = split(mapLine)
   var ctx
@@ -94,6 +124,10 @@ function pretty (opts) {
     var parsed = new Parse(line)
     var value = parsed.value
 
+    if (filterLevel > value.level) {
+      return;
+    }
+
     if (parsed.err || !isPinoLine(value)) {
       // pass through
       return line + '\n'
@@ -112,22 +146,56 @@ function pretty (opts) {
         ? asColoredLevel(value) + ' ' + formatTime(value)
         : formatTime(value, ' ') + asColoredLevel(value)
 
-    line += ' ('
-    if (value.name) {
-      line += value.name + '/'
+    if (showHostname) {
+      line += ' ('
+      if (value.name) {
+        line += value.name + '/'
+      }
+        
+      line += value.pid + ' on ' + value.hostname + ')'
+      line += ':'
+    } else {
+      line += '[' + (value.name ? value.name : value.pid) + ']:';      
     }
-    line += value.pid + ' on ' + value.hostname + ')'
-    line += ': '
+
+    if (showBase) {
+      var base = filterBase(value, messageKey);
+      if (base) {
+        line += '\n' + JSON.stringify(base, null, 2);
+      }
+    }
+
     if (value[messageKey]) {
-      line += ctx.cyan(value[messageKey])
+      line += ctx.cyan(msgToString(value[messageKey]));
     }
     line += '\n'
-    if (value.type === 'Error') {
-      line += '    ' + withSpaces(value.stack) + '\n'
-    } else {
-      line += filter(value, messageKey)
-    }
     return line
+  }
+
+  function msgToString(msg) {
+    var ret = '';
+    msg.map(function (m) {
+      if (m.t === 's') {
+        ret += '\n' + asString(m.o);
+      } else if (m.t === 'o') {
+        ret += '\n' + asObject(m.o);
+      } else if (m.t === 'e') {
+        ret += '\n' + asError(m.o);
+      }
+    });
+    return ret;
+  }
+
+  function asObject (obj) {
+    return JSON.stringify(JSON.parse(obj), null, 2);
+  }
+
+  function asString (str) {
+    return str;
+  }
+
+  function asError (err) {
+    return err.stack;
   }
 
   function asISODate (time) {
