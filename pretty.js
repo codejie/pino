@@ -155,7 +155,7 @@ function pretty (opts) {
       line += value.pid + ' on ' + value.hostname + ')'
       line += ':'
     } else {
-      line += '[' + (value.name ? value.name : value.pid) + ']:';      
+      line += ' [' + (value.name ? value.name : value.pid) + ']:';      
     }
 
     if (showBase) {
@@ -181,21 +181,50 @@ function pretty (opts) {
         ret += '\n' + asObject(m.o);
       } else if (m.t === 'e') {
         ret += '\n' + asError(m.o);
+      } else if (m.t == 'a') {
+        ret += '\n' + asArray(m.o);
+      } else {
+        ret += '\n' + asObject(m.o);
       }
     });
     return ret;
   }
 
   function asObject (obj) {
-    return JSON.stringify(JSON.parse(obj), null, 2);
+    return JSON.stringify(obj, null, 2);
   }
 
   function asString (str) {
-    return str;
+    return '"' + str + '"';
   }
 
   function asError (err) {
     return err.stack;
+  }
+
+  function asArray (arr) {
+    var ret = '[';
+    arr.map(function (a) {
+      if (typeof a === 'string') {
+        ret += '\n  ' + asString(a) + ',';
+      // } else if (typeof a == 'number') {
+      //   ret += '\n  ' + asNumber(a) + ',';
+      } else {
+        if (a instanceof Array) {
+          ret += '\n  ' + asArray(a) + ',';
+        } else if (a instanceof Error) {
+          ret += '\n  ' + asError(a) + ',';
+        } else {
+          ret += '\n  ' + asObject(a) + ',';
+        }
+      }
+    });
+    ret += '\n]';
+    return ret;
+  }
+
+  function asNumber (num) {
+    return num.toString();
   }
 
   function asISODate (time) {

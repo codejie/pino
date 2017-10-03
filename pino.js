@@ -176,10 +176,15 @@ function asJson (obj, msg, num) {
               stack: m.stack
             }
           });
+        } else if (m instanceof Array) {
+          ret.push({
+            t: 'a',
+            o: m
+          }); 
         } else {
           ret.push({
             t: 'o',
-            o: JSON.stringify(m)
+            o: m//JSON.stringify(m)
           });
         };
       }
