@@ -67,6 +67,25 @@ function filterBase (value, messageKey) {
   }
 }
 
+function filterMsg (value, messageKey) {
+  var keys = Object.keys(value)
+  // var filteredKeys = standardKeys.concat([messageKey])
+
+  var ret = {};
+  keys.map(function (key) {
+    if (key !== messageKey) {
+      ret[key] = value[key];
+    }
+  });
+
+  if (Object.keys(ret).length > 0) {
+    return ret;
+  } else {
+    return null;
+  }
+  
+}
+
 function isPinoLine (line) {
   return line &&
     line.hasOwnProperty('hostname') &&
@@ -160,10 +179,15 @@ function pretty (opts) {
     }
 
     if (showBase) {
-      var base = filterBase(value, messageKey);
+      var base = filterMsg(value, messageKey);
       if (base) {
         line += '\n' + JSON.stringify(base, null, 2);
       }
+    } else {
+      var base = filterBase(value, messageKey);
+      if (base) {
+        line += '\n' + JSON.stringify(base, null, 2);
+      }      
     }
 
     if (value[messageKey]) {
