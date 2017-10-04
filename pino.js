@@ -11,6 +11,7 @@ var levels = require('./lib/levels')
 var tools = require('./lib/tools')
 var serializers = require('./lib/serializers')
 var time = require('./lib/time')
+var types = require('./lib/types');
 var needsMetadata = Symbol.for('needsMetadata')
 var isStandardLevelVal = levels.isStandardLevelVal
 var isStandardLevel = levels.isStandardLevel
@@ -164,13 +165,18 @@ function asJson (obj, msg, num) {
     msg.forEach(function (m) {
       if (typeof m === 'string') {
         ret.push({
-          t: 's',
+          t: types.string,
+          o: m
+        });
+      } else if (typeof m === 'number') {
+        ret.push({
+          t: types.number,
           o: m
         });
       } else {
         if (m instanceof Error) {
           ret.push({
-            t: 'e',
+            t: types.error,
             o: {
               msg: m.message,
               stack: m.stack
@@ -178,12 +184,12 @@ function asJson (obj, msg, num) {
           });
         } else if (m instanceof Array) {
           ret.push({
-            t: 'a',
+            t: types.array,
             o: m
           }); 
         } else {
           ret.push({
-            t: 'o',
+            t: types.object,
             o: m//JSON.stringify(m)
           });
         };

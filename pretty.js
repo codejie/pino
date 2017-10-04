@@ -6,6 +6,7 @@ var chalk = require('chalk')
 var format = require('quick-format-unescaped')
 
 var standardLevels = require('./lib/levels');
+var types = require('./lib/types');
 
 var levels = {
   default: 'USERLVL',
@@ -124,14 +125,14 @@ function pretty (opts) {
     var parsed = new Parse(line)
     var value = parsed.value
 
-    if (filterLevel > value.level) {
-      return;
-    }
-
     if (parsed.err || !isPinoLine(value)) {
       // pass through
-      return line + '\n'
+      return '[un-pino] ' + line + '\n';
     }
+
+    if (filterLevel > value.level) {
+      return;
+    }    
 
     if (formatter) {
       return opts.formatter(parsed.value) + '\n'
@@ -175,16 +176,16 @@ function pretty (opts) {
   function msgToString(msg) {
     var ret = '';
     msg.map(function (m) {
-      if (m.t === 's') {
+      if (m.t == types.string) {
         ret += '\n' + asString(m.o);
-      } else if (m.t === 'o') {
+      } else if (m.t == types.object) {
         ret += '\n' + asObject(m.o);
-      } else if (m.t === 'e') {
+      } else if (m.t == types.error) {
         ret += '\n' + asError(m.o);
-      } else if (m.t == 'a') {
+      } else if (m.t == types.array) {
         ret += '\n' + asArray(m.o);
       } else {
-        ret += '\n' + asObject(m.o);
+        ret += '\n' + asNumber(m.o);
       }
     });
     return ret;
@@ -207,8 +208,8 @@ function pretty (opts) {
     arr.map(function (a) {
       if (typeof a === 'string') {
         ret += '\n  ' + asString(a) + ',';
-      // } else if (typeof a == 'number') {
-      //   ret += '\n  ' + asNumber(a) + ',';
+      } else if (typeof a == 'number') {
+        ret += '\n  ' + asNumber(a) + ',';
       } else {
         if (a instanceof Array) {
           ret += '\n  ' + asArray(a) + ',';
