@@ -14,17 +14,45 @@ const o = {
     o2: o2
 };
 const obj = {
-    obj1: 'object1',
+    obj1: '',
     obj2: 2,
     obj3: o
 };
 const err = new Error('this is an error');
 // throw err;
 
-pino.levelVal = 'debug';
-// console.log(typeof 1);
-// console.log([1] instanceof Array);
-pinoRaw.warn({a: 1,hostname:'host', o: obj}, obj, err, '123');
+pino.levelVal = 'trace';
+pinoRaw.levelVal = 'trace';
+
+pino.info({name: 'pino-json'}, 'this is a string message.');
+pinoRaw.info({name: 'pino-json'}, 'this is a string message.');
+
+pino.info('this is a string message.');
+pinoRaw.info('this is a string message.');
+
+pino.trace('string message', {obj: true}, 42, 'format = %d', 1);
+pinoRaw.trace('string message', {obj: true}, 42, 'format = %d', 1);
+
+pino.info(['this', 'is', 'an', 'array']);
+pinoRaw.info(['this', 'is', 'an', 'array']);
+
+pino.error(new Error('this is an error.'));
+pinoRaw.error(new Error('this is an error.'));
+
+const obj1 = {
+    a: 'a',
+    b: 1
+};
+const obj2 = {
+    c: ['this', 'is', 'c'],
+    d: obj1
+};
+pino.warn({name: 'object'}, obj1, obj2);
+pinoRaw.warn({name: 'object'}, obj1, obj2);
+
+
+// pinoRaw.info({a: 1,hostname:'host', o: obj}, obj, err, '123');
+
 // pinoRaw.warn([1], obj, 'value = %d', 1.00,2,3,4,5,'aaaa', ["1.01",2,'3', obj], obj);
 // pino.debug({name: 'T'}, {a: 1, b: 2});
 // pinoRaw.info('what%j', {a:1, b:0}, '123',  obj, err);
@@ -33,4 +61,5 @@ pinoRaw.warn({a: 1,hostname:'host', o: obj}, obj, err, '123');
 // pino.levelVal = 'error';
 // pino.levelVal = 'debug';
 // pinoRaw.info(err);
+// pino.trace({}, 'a=%s', '1');
 

@@ -1,7 +1,7 @@
 {
-  "name": "pino",
-  "version": "4.7.2",
-  "description": "super fast, all natural json logger",
+  "name": "pino-step",
+  "version": "1.0.0",
+  "description": "base on pino - super fast, all natural json logger",
   "main": "pino.js",
   "browser": "./browser.js",
   "bin": {
@@ -35,7 +35,7 @@
   "precommit": "test",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pinojs/pino.git"
+    "url": "git+https://github.com/codejie/pino.git"
   },
   "keywords": [
     "fast",
@@ -51,9 +51,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pinojs/pino/issues"
+    "url": "https://github.com/codejie/pino/issues"
   },
-  "homepage": "http://getpino.io",
+  "homepage": "https://github.com/codejie/pino/README.md",
   "devDependencies": {
     "benchmark": "^2.1.2",
     "bole": "^3.0.2",

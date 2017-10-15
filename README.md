@@ -1,356 +1,162 @@
+# pino-step base on the pino
+pino-step is a fork branch of the `pino` (https://github.com/pinojs/pino), please find more information from `pino's README` (https://github.com/pinojs/pino/blob/master/README.md).
+
 ![banner](pino-banner.png)
 
-# pino&nbsp;&nbsp;[![Build Status](https://travis-ci.org/pinojs/pino.svg?branch=master)](https://travis-ci.org/pinojs/pino)&nbsp;[![Coverage Status](https://coveralls.io/repos/github/pinojs/pino/badge.svg?branch=master)](https://coveralls.io/github/pinojs/pino?branch=master) [![TypeScript definitions on DefinitelyTyped](http://definitelytyped.org/badges/standard.svg)](http://definitelytyped.org)
-
-[Extremely fast](#benchmarks) node.js logger, inspired by Bunyan.
-It also includes a shell utility to pretty-print its log files.
-
-![cli](demo.png)
-
-* [Installation](#install)
-* [Usage](#usage)
-* [Benchmarks](#benchmarks)
-* [API ⇗](docs/API.md)
-* [Extreme mode explained ⇗](docs/extreme.md)
-* [Pino Howtos ⇗](docs/howtos.md)
-* [Transports with Pino](#transports)
-* [Pino in the browser](#browser)
-* [Caveats](#caveats)
-* [Team](#team)
-* [Contributing](#contributing)
-* [Acknowledgements](#acknowledgements)
-* [License](#license)
-
-## Install
-
+# pino-step
+pino is a very pretty node.js looger, pino-step just updates afew lines base on it.
+# Usage
 ```
-npm install pino --save
+npm install --save pino-step
 ```
 
-If you need support for Node.js v0.12 or v0.10, please install the latest 2.x release using the `legacy` tag:
-
-```
-npm install pino@legacy --save
-```
-
-Documentation for the legacy version 2.x is available on the [`v2.x.x` branch](https://github.com/pinojs/pino/tree/v2.x.x).
-
-## Usage
-
+# Example
 ```js
-'use strict'
-
-var pino = require('pino')()
-
-pino.info('hello world')
-pino.error('this is at error level')
-pino.info('the answer is %d', 42)
-pino.info({ obj: 42 }, 'hello world')
-pino.info({ obj: 42, b: 2 }, 'hello world')
-pino.info({ obj: { aa: 'bbb' } }, 'another')
-setImmediate(function () {
-  pino.info('after setImmediate')
-})
-pino.error(new Error('an error'))
-
-var child = pino.child({ a: 'property' })
-child.info('hello child!')
-
-var childsChild = child.child({ another: 'property' })
-childsChild.info('hello baby..')
+const pinoRaw = require('./')();
+const pino = require('./')({
+    prettyPrint: true
+});
 
 ```
-
-This produces:
-
-```
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":30,"msg":"hello world","time":1459529098958,"v":1}
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":50,"msg":"this is at error level","time":1459529098959,"v":1}
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":30,"msg":"the answer is 42","time":1459529098960,"v":1}
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":30,"msg":"hello world","time":1459529098960,"obj":42,"v":1}
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":30,"msg":"hello world","time":1459529098960,"obj":42,"b":2,"v":1}
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":30,"msg":"another","time":1459529098960,"obj":{"aa":"bbb"},"v":1}
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":50,"msg":"an error","time":1459529098961,"type":"Error","stack":"Error: an error\n    at Object.<anonymous> (/Users/davidclements/z/nearForm/pino/example.js:14:12)\n    at Module._compile (module.js:435:26)\n    at Object.Module._extensions..js (module.js:442:10)\n    at Module.load (module.js:356:32)\n    at Function.Module._load (module.js:311:12)\n    at Function.Module.runMain (module.js:467:10)\n    at startup (node.js:136:18)\n    at node.js:963:3","v":1}
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":30,"msg":"hello child!","time":1459529098962,"a":"property","v":1}
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":30,"msg":"hello baby..","time":1459529098962,"another":"property","a":"property","v":1}
-{"pid":94473,"hostname":"MacBook-Pro-3.home","level":30,"msg":"after setImmediate","time":1459529098963,"v":1}
-
-```
-
-<a name="benchmarks"></a>
-## Benchmarks
-
-As far as we know, it is one of the fastest loggers in town:
-
-`pino.info('hello world')`:
-
-```
-benchBunyan*10000: 1355.229ms
-benchWinston*10000: 2226.117ms
-benchBole*10000: 291.727ms
-benchDebug*10000: 445.291ms
-benchLogLevel*10000: 322.181ms
-benchPino*10000: 269.109ms
-benchPinoExtreme*10000: 102.239ms
-```
-
-`pino.info({'hello': 'world'})`:
-
-```
-benchBunyanObj*10000: 1464.568ms
-benchWinstonObj*10000: 2177.602ms
-benchBoleObj*10000: 322.105ms
-benchLogLevelObject*10000: 1443.148ms
-benchPinoObj*10000: 309.564ms
-benchPinoUnsafeObj*10000: 301.308ms
-benchPinoExtremeObj*10000: 130.343ms
-benchPinoUnsafeExtremeObj*10000: 131.322ms
-```
-
-`pino.info(aBigDeeplyNestedObject)`:
-
-```
-benchBunyanDeepObj*10000: 8749.174ms
-benchWinstonDeepObj*10000: 17761.409ms
-benchBoleDeepObj*10000: 5252.563ms
-benchLogLevelDeepObj*10000: 43518.525ms
-benchPinoDeepObj*10000: 5124.361ms
-benchPinoUnsafeDeepObj*10000: 3539.253ms
-benchPinoExtremeDeepObj*10000: 5138.457ms
-benchPinoUnsafeExtremeDeepObj*10000: 3480.270ms
-```
-
-`pino.info('hello %s %j %d', 'world', {obj: true}, 4, {another: 'obj'})`:
-
-```
-benchDebugInterpolateExtra*10000: 640.001ms
-benchBunyanInterpolateExtra*10000: 2888.825ms
-benchWinstonInterpolateExtra*10000: 2616.285ms
-benchBoleInterpolateExtra*10000: 1313.470ms
-benchLogLevelInterpolateExtra*10000: 1487.610ms
-benchPinoInterpolateExtra*10000: 486.367ms
-benchPinoUnsafeInterpolateExtra*10000: 457.778ms
-benchPinoExtremeInterpolateExtra*10000: 314.635ms
-benchPinoUnsafeExtremeInterpolateExtra*10000: 294.915ms
-```
-
-In many cases, pino is over 6x faster than alternatives.
-
-For a fair comparison, [LogLevel](http://npm.im/loglevel) was extended
-to include a timestamp and [bole](http://npm.im/bole) had
-`fastTime` mode switched on.
-
-<a name="transports"></a>
-## Transports
-
-A transport in most logging libraries is something that runs in-process to
-perform some operation with the finalized log line. For example, a transport
-might send the log line to a standard syslog server after processing the log
-line and reformatting it. For details on implementing, and some already written,
-transports, see our [Transports⇗](docs/transports.md) document.
-
-> **Pino *does not* natively support in-process transports.**
-
-Pino does not support in-process transports because Node processes are
-single threaded processes (ignoring some technical details). Given this
-restriction, one of the methods Pino employs to achieve its speed is to
-purposefully offload the handling of logs, and their ultimate destination, to
-external processes so that the threading capabilities of the OS can be
-used (or other CPUs).
-
-One consequence of this methodology is that "error" logs do not get written to
-`stderr`. However, since Pino logs are in a parseable format, it is possible to
-use tools like [pino-tee][pino-tee] or [jq][jq] to work with the logs. For
-example, to view only logs marked as "error" logs:
-
-```
-$ node an-app.js | jq 'select(.level == 50)'
-```
-
-In short, the way Pino generates logs:
-
-1. Reduces the impact of logging on your application to an extremely minimal amount.
-2. Gives greater flexibility in how logs are processed and stored.
-
-Given all of the above, Pino clearly promotes out-of-process log processing.
-However, it is possible to wrap Pino and perform processing in-process.
-For an example of this, see [pino-multi-stream][pinoms].
-
-[pino-tee]: https://npm.im/pino-tee
-[jq]: https://stedolan.github.io/jq/
-[pinoms]: https://npm.im/pino-multi-stream
-
-<a name="browser"></a>
-## Pino in the browser
-
-Pino is compatible with [`browserify`](http://npm.im) for browser side usage:
-
-This can be useful with isomorphic/universal JavaScript code.
-
-By default, in the browser,
-`pino` uses corresponding [Log4j](https://en.wikipedia.org/wiki/Log4j) `console` methods (`console.error`, `console.warn`, `console.info`, `console.debug`, `console.trace`) and uses `console.error` for any `fatal` level logs.
-
-### Browser Options
-
-Pino can be passed a `browser` object in the options object,
-which can have a `write` property or an `asObject` property.
-
-#### `asObject` (Boolean)
-
+## name instead of pid+hostname
+as default, pino-step uses name or js script name instead of pid and hostname in pino.
 ```js
-var pino = require('pino')({browser: {asObject: true}})
+pino.info({name: 'pino-json'}, 'this is a string message.');
+pinoRaw.info({name: 'pino-json'}, 'this is a string message.');
+
+pino.info('this is a string message.');
+pinoRaw.info('this is a string message.');
+```
+output
+```
+>node try.js
+[2017-10-15T14:01:25.536Z] INFO [pino-json]:
+"this is a string message."
+{"pid":14533,"name":"try.js","hostname":"192.168.0.102","level":30,"time":1508076085540,"msg":[{"t":0,"o":"this is a string message."}],"name":"pino-json","v":1}
+~/Code/hub/pino[master]>node try.js
+[2017-10-15T14:04:02.485Z] INFO [pino-json]:
+"this is a string message."
+{"pid":14593,"name":"try.js","hostname":"192.168.0.102","level":30,"time":1508076242489,"msg":[{"t":0,"o":"this is a string message."}],"name":"pino-json","v":1}
+[2017-10-15T14:04:02.489Z] INFO [try.js]:
+"this is a string message."
+{"pid":14593,"name":"try.js","hostname":"192.168.0.102","level":30,"time":1508076242489,"msg":[{"t":0,"o":"this is a string message."}],"v":1}
 ```
 
-The `asObject` option will create a pino-like log object instead of
-passing all arguments to a console method, for instance:
-
-```js
-pino.info('hi') // creates and logs {msg: 'hi', level: 30, time: <ts>}
+## all in msg, and all are an object with type
+all log elements are with itself type, and as an object, all of them are included msg part like following object type.
+```json
+{
+  "t": [type],
+  "o": [output]
+}
 ```
-
-When `write` is set, `asObject` will always be `true`.
-
-#### `write` (Function | Object)
-
-Instead of passing log messages to `console.log` they can be passed to
-a supplied function.
-
-If `write` is set to a single function, all logging objects are passed
-to this function.
-
 ```js
-var pino = require('pino')({browser: {write: (o) => {
-  // do something with o
-}}})
+pino.trace('string message', {obj: true}, 42, 'format = %d', 1);
+pinoRaw.trace('string message', {obj: true}, 42, 'format = %d', 1);
 ```
-
-If `write` is an object, it can have methods that correspond to the
-levels. When a message is logged at a given level, the corresponding
-method is called. If a method isn't present, the logging falls back
-to using the `console`.
-
-
+output
+```
+[2017-10-15T14:19:32.987Z] TRACE [try.js]:
+"string message"
+{
+  "obj": true
+}
+42
+"format = 1"
+{"pid":15397,"name":"try.js","hostname":"192.168.0.102","level":10,"time":1508077172987,"msg":[{"t":0,"o":"string message"},{"t":1,"o":{"obj":true}},{"t":4,"o":42},{"t":0,"o":"format = 1"}],"v":1}
+``` 
+now pino-step supports the following types.
 ```js
-var pino = require('pino')({browser: {write: {
-  info: function (o) {
-    //process info log object
-  },
-  error: function (o) {
-    //process error log object
+module.exports = {
+    string: 0,
+    object: 1,
+    error: 2,
+    array: 3,
+    number: 4
+};
+```
+```js
+pino.info(['this', 'is', 'an', 'array']);
+pinoRaw.info(['this', 'is', 'an', 'array']);
+
+pino.error(new Error('this is an error.'));
+pinoRaw.error(new Error('this is an error.'));
+```
+output
+```
+[2017-10-15T14:32:31.466Z] INFO [try.js]:
+[
+  "this",
+  "is",
+  "an",
+  "array",
+]
+{"pid":16034,"name":"try.js","hostname":"192.168.0.102","level":30,"time":1508077951467,"msg":[{"t":3,"o":["this","is","an","array"]}],"v":1}
+[2017-10-15T14:32:31.467Z] ERROR [try.js]:
+Error: this is an error.
+    at Object.<anonymous> (/Users/Jie/Code/hub/pino/try.js:39:12)
+    at Module._compile (module.js:624:30)
+    at Object.Module._extensions..js (module.js:635:10)
+    at Module.load (module.js:545:32)
+    at tryModuleLoad (module.js:508:12)
+    at Function.Module._load (module.js:500:3)
+    at Function.Module.runMain (module.js:665:10)
+    at startup (bootstrap_node.js:201:16)
+    at bootstrap_node.js:626:3
+{"pid":16034,"name":"try.js","hostname":"192.168.0.102","level":50,"time":1508077951467,"msg":[{"t":2,"o":{"msg":"this is an error.","stack":"Error: this is an error.\n    at Object.<anonymous> (/Users/Jie/Code/hub/pino/try.js:40:15)\n    at Module._compile (module.js:624:30)\n    at Object.Module._extensions..js (module.js:635:10)\n    at Module.load (module.js:545:32)\n    at tryModuleLoad (module.js:508:12)\n    at Function.Module._load (module.js:500:3)\n    at Function.Module.runMain (module.js:665:10)\n    at startup (bootstrap_node.js:201:16)\n    at bootstrap_node.js:626:3"}}],"v":1}
+```
+## more complex object
+pino-step supports to record and output more complex object log.
+```js
+const obj1 = {
+    a: 'a',
+    b: 1
+};
+const obj2 = {
+    c: ['this', 'is', 'c'],
+    d: obj1
+};
+pino.warn({name: 'object'}, obj1, obj2);
+pinoRaw.warn({name: 'object'}, obj1, obj2);
+
+```
+output
+```
+[2017-10-15T14:40:58.469Z] WARN [object]:
+{
+  "a": "a",
+  "b": 1
+}
+{
+  "c": [
+    "this",
+    "is",
+    "c"
+  ],
+  "d": {
+    "a": "a",
+    "b": 1
   }
-}}})
+}
+{"pid":16661,"name":"try.js","hostname":"192.168.0.102","level":40,"time":1508078458469,"msg":[{"t":1,"o":{"a":"a","b":1}},{"t":1,"o":{"c":["this","is","c"],"d":{"a":"a","b":1}}}],"name":"object","v":1}
 ```
+## more arguments
+pino-step can take more arguments than 11 that pino takes.
 
-<a name="caveats"></a>
-## Caveats
-
-There's some fine points to be aware of, which are a result of worthwhile trade-offs:
-
-### 11 Arguments
-
-The logger functions (e.g. `pino.info`) can take a maximum of 11 arguments.
-
-If you need more than that to write a log entry, you're probably doing it wrong.
-
-### Duplicate Keys
-
-It's possible for naming conflicts to arise between child loggers and
-children of child loggers.
-
-This isn't as bad as it sounds, even if you do use the same keys between
-parent and child loggers Pino resolves the conflict in the sanest way.
-
-For example, consider the following:
-
+tools.js in pino-step
 ```js
-var pino = require('pino')
-var fs = require('fs')
-pino(fs.createWriteStream('./my-log'))
-  .child({a: 'property'})
-  .child({a: 'prop'})
-  .info('howdy')
+function genLog (z) {
+  return function LOG () {
+    var m = arguments[0];
+    ...
+```
+tools.js in pino
+```js
+function genLog (z) {
+  return function LOG (a, b, c, d, e, f, g, h, i, j, k) {
+     var l = 0
+     ...
 ```
 
-```sh
-$ cat my-log
-{"pid":95469,"hostname":"MacBook-Pro-3.home","level":30,"msg":"howdy","time":1459534114473,"a":"property","a":"prop","v":1}
-```
-
-Notice how there's two key's named `a` in the JSON output. The sub-childs properties
-appear after the parent child properties. This means if we run our logs through `pino -t` (or convert them to objects in any other way) we'll end up with one `a` property whose value corresponds to the lowest child in the hierarchy:
-
-```sh
-$ cat my-log | pino -t
-{"pid":95469,"hostname":"MacBook-Pro-3.home","level":30,"msg":"howdy","time":"2016-04-01T18:08:34.473Z","a":"prop","v":1}
-```
-
-This equates to the same log output that Bunyan supplies.
-
-One of Pino's performance tricks is to avoid building objects and stringifying
-them, so we're building strings instead. This is why duplicate keys between
-parents and children will end up in log output.
-
-<a name="team"></a>
-## The Team
-
-### Matteo Collina
-
-<https://github.com/pinojs>
-
-<https://www.npmjs.com/~matteo.collina>
-
-<https://twitter.com/matteocollina>
-
-### David Mark Clements
-
-<https://github.com/davidmarkclements>
-
-<https://www.npmjs.com/~davidmarkclements>
-
-<https://twitter.com/davidmarkclem>
-
-### James Sumners
-
-<https://github.com/jsumners>
-
-<https://www.npmjs.com/~jsumners>
-
-<https://twitter.com/jsumners79>
-
-### Thomas Watson Steen
-
-<https://github.com/watson>
-
-<https://www.npmjs.com/~watson>
-
-<https://twitter.com/wa7son>
-
-### Chat on Gitter
-
-<https://gitter.im/pinojs/pino>
-
-### Chat on IRC
-
-You'll find an active group of Pino users in the #pinojs channel on Freenode, including some of the contributors to this project.
-
-## Contributing
-
-Pino is an **OPEN Open Source Project**. This means that:
-
-> Individuals making significant and valuable contributions are given commit-access to the project to contribute as they see fit. This project is more like an open wiki than a standard guarded open source project.
-
-See the [CONTRIBUTING.md](https://github.com/pinojs/pino/blob/master/CONTRIBUTING.md) file for more details.
-
-<a name="acknowledgements"></a>
-## Acknowledgements
-
-This project was kindly sponsored by [nearForm](http://nearform.com).
-
-Logo and identity designed by Beibhinn Murphy O'Brien: https://www.behance.net/BeibhinnMurphyOBrien.
-
-## License
-
-Licensed under [MIT](./LICENSE).
-
-[elasticsearch]: https://www.elastic.co/products/elasticsearch
-[kibana]: https://www.elastic.co/products/kibana
+# more
+pino-step is just a fork of [pino](https://github.com/pinojs/pino), please find more in pino pages.
