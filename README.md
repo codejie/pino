@@ -1,10 +1,10 @@
 # pino-step base on the pino
-pino-step is a fork branch of the `pino` (https://github.com/pinojs/pino), please find more information from `pino's README` (https://github.com/pinojs/pino/blob/master/README.md).
+pino-step is a fork branch of the [`pino`](https://github.com/pinojs/pino), please find more information from [`pino's README`](https://github.com/pinojs/pino/blob/master/README.md).
 
 ![banner](pino-banner.png)
 
 # pino-step
-pino is a very pretty node.js looger, pino-step just updates afew lines base on it.
+pino is a very pretty node.js logger, pino-step just updates afew lines base on it.
 # Usage
 ```
 npm install --save pino-step

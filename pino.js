@@ -197,7 +197,7 @@ function asJson (obj, msg, num) {
        ++ i;
     });
 
-    data += this.messageKeyString + JSON.stringify(ret);
+    data += this.messageKeyString + this.stringify(ret);//JSON.stringify(ret);
   }
 
   data = data + this.chindings;
