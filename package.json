@@ -1,6 +1,6 @@
 {
   "name": "pino-step",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "base on pino - super fast, all natural json logger",
   "main": "pino.js",
   "browser": "./browser.js",
