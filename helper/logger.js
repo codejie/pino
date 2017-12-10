@@ -5,7 +5,11 @@ const pino = require('pino-step');
 const Log = {
     __level: 'info',
     __pretty: false, 
+    __name: require('path').basename(process.argv[1]),
     pino: pino({
+        level: 'info',
+        name: require('path').basename(process.argv[1]),
+        prettyPrint: false,
         safe: true
     })
 };
@@ -44,22 +48,46 @@ Object.defineProperty(Log, 'level', {
 
 Object.defineProperty(Log, 'pretty', {
     get: function () {
-        return __pretty;
+        return Log.__pretty;
     },
     set: function (enabled) {
         Log.__pretty = enabled;
         if (Log.__pretty) {
             Log.pino = pino({
+                name: Log.__name,
                 prettyPrint: true,
                 safe: true
             });
         } else {
             Log.pino = pino({
+                name: Log.__name,
                 safe: true
             });
         }
         Log.pino.levelVal = Log.__level;
     }
 });
+
+Object.defineProperty(Log, 'name', {
+    get: function () {
+        return Log.__name;
+    },
+    set: function (name) {
+        Log.__name = name;
+        if (Log.__pretty) {
+            Log.pino = pino({
+                name: Log.__name,
+                prettyPrint: true,
+                safe: true
+            });
+        } else {
+            Log.pino = pino({
+                name: Log.__name,
+                safe: true
+            });
+        }
+        Log.pino.levelVal = Log.__level;        
+    }
+})
 
 module.exports = Log;

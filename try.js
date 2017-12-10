@@ -2,7 +2,8 @@
 
 const pinoRaw = require('./')();
 const pino = require('./')({
-    prettyPrint: true
+    prettyPrint: true,
+    name: 'hhhhh'
 });
 
 
