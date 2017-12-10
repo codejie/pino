@@ -1,6 +1,6 @@
 {
   "name": "pino-step",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "base on pino - super fast, all natural json logger",
   "main": "pino.js",
   "browser": "./browser.js",
@@ -16,7 +16,8 @@
     "test",
     "docs",
     "example.js",
-    "lib"
+    "lib",
+    "helper"
   ],
   "scripts": {
     "browser-test": "zuul tape test/browser.test.js --local",
